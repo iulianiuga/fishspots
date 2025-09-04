@@ -1,0 +1,12 @@
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+@import "ol/ol.css";
+
+
+@import "@fontsource-variable/inter/index.css";
+:root { --font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+body, .p-component { font-family: var(--font-family); }
+
+html, body { height: 100%; margin: 0; }
+#map { height: calc(100dvh - 56px); } // sub toolbar
+
