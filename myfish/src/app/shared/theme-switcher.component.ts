@@ -3,7 +3,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../core/theme.service';
 
-type ThemeKey = 'lara-light-blue' | 'lara-dark-blue';
+type ThemeKey = 'lara-light-blue' | 'lara-dark-blue' | 'fluent-light';
 
 @Component({
   selector: 'theme-switcher',
@@ -24,7 +24,8 @@ type ThemeKey = 'lara-light-blue' | 'lara-dark-blue';
 export class ThemeSwitcherComponent {
   options = [
     { label: 'Lara Light Blue', value: 'lara-light-blue' as ThemeKey },
-    { label: 'Lara Dark Blue',  value: 'lara-dark-blue'  as ThemeKey }
+    { label: 'Lara Dark Blue',  value: 'lara-dark-blue'  as ThemeKey },
+    { label: 'Fluent Light',    value: 'fluent-light'    as ThemeKey }
   ];
 
   selected = signal<ThemeKey>('lara-light-blue');

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-type ThemeKey = 'lara-light-blue' | 'lara-dark-blue';
+type ThemeKey = 'lara-light-blue' | 'lara-dark-blue' | 'fluent-light';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -16,20 +16,25 @@ export class ThemeService {
     return (localStorage.getItem(this.storageKey) as ThemeKey) || 'lara-light-blue';
   }
 
+  // applyTheme(theme: ThemeKey) {
+  //   const linkEl = document.getElementById(this.linkId) as HTMLLinkElement | null;
+  //   const href = `assets/primeng/resources/themes/${theme}/theme.css`;
+  //   if (linkEl) {
+  //     linkEl.href = href;
+  //     localStorage.setItem(this.storageKey, theme);
+  //   } else {
+  //     // fallback (nu ar trebui sa se intample)
+  //     const el = document.createElement('link');
+  //     el.id = this.linkId;
+  //     el.rel = 'stylesheet';
+  //     el.href = href;
+  //     document.head.appendChild(el);
+  //     localStorage.setItem(this.storageKey, theme);
+  //   }
+  // }
   applyTheme(theme: ThemeKey) {
-    const linkEl = document.getElementById(this.linkId) as HTMLLinkElement | null;
-    const href = `assets/primeng/resources/themes/${theme}/theme.css`;
-    if (linkEl) {
-      linkEl.href = href;
-      localStorage.setItem(this.storageKey, theme);
-    } else {
-      // fallback (nu ar trebui sa se intample)
-      const el = document.createElement('link');
-      el.id = this.linkId;
-      el.rel = 'stylesheet';
-      el.href = href;
-      document.head.appendChild(el);
-      localStorage.setItem(this.storageKey, theme);
-    }
+    const linkEl = document.getElementById('theme-css') as HTMLLinkElement;
+    linkEl.href = `assets/primeng/resources/themes/${theme}/theme.css`;
+    localStorage.setItem('myfish.theme', theme);
   }
 }
