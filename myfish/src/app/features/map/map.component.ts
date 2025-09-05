@@ -2,12 +2,11 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@ang
 import { CommonModule } from '@angular/common'; // <-- adaugă acest import
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ButtonModule } from 'primeng/button';
+import { DropdownModule } from 'primeng/dropdown';
 
 import Map from 'ol/Map';
 import View from 'ol/View';
-
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
+import { defaults as defaultControls } from 'ol/control';
 
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -24,7 +23,7 @@ import { apply } from 'ol-mapbox-style';
 import GeoJSON from 'ol/format/GeoJSON';
 
 import { AppSettingsService } from '../../app-settings.service';
-
+import { ThemeSwitcherComponent } from '../../shared/theme-switcher.component';
 
 
 
@@ -35,7 +34,9 @@ import { AppSettingsService } from '../../app-settings.service';
   imports: [
     CommonModule,
     OverlayPanelModule, // <-- PrimeNG OverlayPanel
-    ButtonModule        // <-- PrimeNG Button
+    ButtonModule,        // <-- PrimeNG Button
+    DropdownModule,
+    ThemeSwitcherComponent // <-- adaugă aici
   ]
 })
 
@@ -104,7 +105,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Hartă + view
     this.map = new Map({
       target: this.mapEl.nativeElement,
-      view: new View({ center: initialCenter, zoom: initialZoom })
+      view: new View({ center: initialCenter, zoom: initialZoom }),
+      controls: defaultControls({ zoom: false }) // <-- elimină butoanele de zoom
     });
 
     // Stil Mapbox GL din TileServer-GL (creează automat layerele vector-tile)
@@ -117,13 +119,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.addLayer(markerLayer);
     this.map.addLayer(poiLayer);
 
-    // Handler reset view
+    // Zoom pe România la inițializare
+    const extent4326 = [20.2201924985, 43.6884447292, 29.62654341, 48.2208812526];
+    const extent3857 = transformExtent(extent4326, 'EPSG:4326', this.map.getView().getProjection());
+    this.map.getView().fit(extent3857, { duration: 0, padding: [40, 40, 40, 40] });
+
     window.addEventListener('reset-map-view', this.resetHandler);
   }
 
   resetView() {
-    const centerRo = fromLonLat([26.1, 44.43]);
-    this.map.getView().animate({ center: centerRo, zoom: 7, duration: 400 });
+    // Extinderea pentru România în EPSG:4326
+    const extent4326 = [20.2201924985, 43.6884447292, 29.62654341, 48.2208812526];
+    // Transformă extinderea în proiecția hărții (EPSG:3857)
+    const extent3857 = transformExtent(extent4326, 'EPSG:4326', this.map.getView().getProjection());
+    // Zoom to extindere
+    this.map.getView().fit(extent3857, { duration: 400, padding: [40, 40, 40, 40] });
   }
 
   ngOnDestroy(): void {
