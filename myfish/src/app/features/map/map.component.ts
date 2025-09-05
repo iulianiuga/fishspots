@@ -11,7 +11,11 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { Style, Circle as CircleStyle, Fill, Stroke } from 'ol/style';
 
+import { bbox as bboxStrategy } from 'ol/loadingstrategy';
+import { transformExtent } from 'ol/proj';
+
 import { apply } from 'ol-mapbox-style';
+import GeoJSON from 'ol/format/GeoJSON';
 
 @Component({
   selector: 'app-map',
@@ -27,6 +31,36 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private resetHandler = () => this.resetView();
 
   ngAfterViewInit(): void {
+    //punctele din harta
+
+    const poiSource = new VectorSource({
+      format: new GeoJSON(),
+      url: (extent, res, proj) => {
+        const ext4326 = transformExtent(extent, proj, 'EPSG:4326');
+        const [minx, miny, maxx, maxy] = ext4326;
+        console.log('Cerere POI pentru extent:', ext4326);
+        console.log('URL POI:', `/api/poi?minlon=${minx}&minlat=${miny}&maxlon=${maxx}&maxlat=${maxy}&limit=5000`);
+        return `/api/poi?minlon=${minx}&minlat=${miny}&maxlon=${maxx}&maxlat=${maxy}&limit=5000`;
+      },
+      strategy: bboxStrategy
+    });
+
+    const poiSimpleStyle = new Style({
+      image: new CircleStyle({
+        radius: 20,
+        fill: new Fill({ color: '#d21919ff' }),
+        stroke: new Stroke({ color: '#ffffff', width: 2 })
+      })
+    });
+
+
+    const poiLayer = new VectorLayer({
+      source: poiSource,
+      style: poiSimpleStyle   // <- doar atât
+    });
+
+
+
     const centerRo = fromLonLat([26.1, 44.43]);
 
     const marker = new Feature<Point>({ geometry: new Point(centerRo) });
@@ -65,9 +99,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const markerLayer = new VectorLayer({
       source: new VectorSource({ features: [marker] })
     });
-    markerLayer.setZIndex(9999); // sigur deasupra
 
+    markerLayer.setZIndex(9999); // sigur deasupra
+    poiLayer.setZIndex(9998);
+    
     this.map.addLayer(markerLayer);
+    this.map.addLayer(poiLayer);
 
     window.addEventListener('reset-map-view', this.resetHandler);
   }

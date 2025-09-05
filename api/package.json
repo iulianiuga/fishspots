@@ -1,0 +1,13 @@
+{
+  "name": "fishspots-api",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2",
+    "express": "^4",
+    "pg": "^8"
+  },
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js"
+  }
+}
