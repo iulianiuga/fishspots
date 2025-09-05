@@ -11,7 +11,18 @@
   <div style="display: flex; flex-direction: column; gap: 0.2rem;">
     <button pButton type="button" label="Romania" (click)="resetView()"></button>
     <theme-switcher></theme-switcher>
+    <p-dropdown
+      [options]="mapStyles"
+      [(ngModel)]="selectedStyle"
+      optionLabel="name"
+      placeholder="Alege stil hartă"
+      (onChange)="onStyleChange($event.value)"
+      styleClass="w-full"
+    ></p-dropdown>
+
     
+
+
     <!-- Poți adăuga și alte controale aici -->
   </div>
 </p-overlayPanel>

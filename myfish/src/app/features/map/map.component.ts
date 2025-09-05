@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'; // <-- adaugă acest import
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -38,6 +39,7 @@ import { HttpClient } from '@angular/common/http';
     OverlayPanelModule, // <-- PrimeNG OverlayPanel
     ButtonModule,        // <-- PrimeNG Button
     DropdownModule,
+    FormsModule,
     ThemeSwitcherComponent // <-- adaugă aici
   ]
 })
@@ -45,17 +47,18 @@ import { HttpClient } from '@angular/common/http';
 
 export class MapComponent implements AfterViewInit, OnDestroy {
   badgeOpen = false;
-  mapStyles: any;
-
-  toggleBadge() {
-    this.badgeOpen = !this.badgeOpen;
-  }
+  mapStyles: any[] = [];
+  selectedStyle: any;
+  private map!: Map;
+  private resetHandler = () => this.resetView();
 
   constructor(private settings: AppSettingsService, private http: HttpClient) { }
 
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
-  private map!: Map;
-  private resetHandler = () => this.resetView();
+
+  toggleBadge() {
+    this.badgeOpen = !this.badgeOpen;
+  }
 
   ngAfterViewInit(): void {
     // Config inițial
@@ -68,9 +71,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     //citesc stilurile de harta available 
     this.http.get<any[]>(this.settings.mapStyles).subscribe(styles => {
       this.mapStyles = styles;
-      // styles.forEach(style => {
-      //   console.log(`${style.name} - ${style.id}`);
-      // });
+      if (styles.length) {
+        this.selectedStyle = styles[0];
+      }
+      styles.forEach(style => {
+        console.log(`${style.name} - ${style.id}`);
+      });
     });
 
 
@@ -138,6 +144,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.getView().fit(extent3857, { duration: 0, padding: [40, 40, 40, 40] });
 
     window.addEventListener('reset-map-view', this.resetHandler);
+  }
+
+  onStyleChange(style: any) {
+    if (style && style.url) {
+      apply(this.map, style.url).catch(err => console.error('Eroare la schimbarea stilului:', err));
+    }
   }
 
   resetView() {
