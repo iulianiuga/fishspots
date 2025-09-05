@@ -1,4 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common'; // <-- adaugă acest import
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ButtonModule } from 'primeng/button';
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -28,11 +31,21 @@ import { AppSettingsService } from '../../app-settings.service';
 @Component({
   selector: 'app-map',
   standalone: true,
-  template: `<div #mapEl id="map" style="width:100%"></div>`
+  templateUrl: './map.component.html',
+  imports: [
+    CommonModule,
+    OverlayPanelModule, // <-- PrimeNG OverlayPanel
+    ButtonModule        // <-- PrimeNG Button
+  ]
 })
 
 
 export class MapComponent implements AfterViewInit, OnDestroy {
+  badgeOpen = false;
+
+  toggleBadge() {
+    this.badgeOpen = !this.badgeOpen;
+  }
 
   constructor(private settings: AppSettingsService) {}
 

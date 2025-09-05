@@ -8,11 +8,15 @@ import { ThemeSwitcherComponent } from './shared/theme-switcher.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToolbarModule, ButtonModule, ThemeSwitcherComponent],
+  imports: [
+    RouterOutlet,
+    ToolbarModule, // <-- PrimeNG Toolbar
+    ButtonModule,  // <-- PrimeNG Button
+    ThemeSwitcherComponent
+  ],
   template: `
     <p-toolbar>
       <div class="p-toolbar-group-start">
-        <!-- <span class="pi pi-map" style="margin-right:.5rem"></span> -->
         <span class="font-semibold">MyFish</span>
       </div>
       <div class="p-toolbar-group-end">
@@ -23,23 +27,7 @@ import { ThemeSwitcherComponent } from './shared/theme-switcher.component';
     <router-outlet />
   `
 })
-
-
-
-// @Component({
-//   selector: 'app-root',
-//   standalone: true,
-//   imports: [RouterOutlet, ToolbarModule, ButtonModule, ThemeSwitcherComponent],
-//   template: `
-
-//     <router-outlet />
-//   `
-// })
-
 export class AppComponent {
-  title(title: any) {
-    throw new Error('Method not implemented.');
-  }
   constructor(private theme: ThemeService) { this.theme.initTheme(); }
   resetView() { window.dispatchEvent(new CustomEvent('reset-map-view')); }
 }
