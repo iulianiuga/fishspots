@@ -25,6 +25,8 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { AppSettingsService } from '../../app-settings.service';
 import { ThemeSwitcherComponent } from '../../shared/theme-switcher.component';
 
+import { HttpClient } from '@angular/common/http';
+
 
 
 @Component({
@@ -43,12 +45,13 @@ import { ThemeSwitcherComponent } from '../../shared/theme-switcher.component';
 
 export class MapComponent implements AfterViewInit, OnDestroy {
   badgeOpen = false;
+  mapStyles: any;
 
   toggleBadge() {
     this.badgeOpen = !this.badgeOpen;
   }
 
-  constructor(private settings: AppSettingsService) {}
+  constructor(private settings: AppSettingsService, private http: HttpClient) { }
 
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
   private map!: Map;
@@ -60,6 +63,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const initialZoom = 6.72;
     const initialCenter = fromLonLat([25.809, 44.973]);
     const centerRo = fromLonLat([26.1, 44.43]);
+
+
+    //citesc stilurile de harta available 
+    this.http.get<any[]>(this.settings.mapStyles).subscribe(styles => {
+      this.mapStyles = styles;
+      // styles.forEach(style => {
+      //   console.log(`${style.name} - ${style.id}`);
+      // });
+    });
+
 
     // Sursă POI din API (GeoJSON) cu BBOX
     const poiSource = new VectorSource({

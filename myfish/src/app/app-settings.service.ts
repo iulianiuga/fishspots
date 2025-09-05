@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 export type AppSettings = {
   mapStyleUrl: string;
   apiBase: string;
+  mapStyles: string;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -17,4 +18,5 @@ export class AppSettingsService {
 
   get mapStyleUrl(): string { return this.settings.mapStyleUrl; }
   get apiBase(): string { return this.settings.apiBase; }
+  get mapStyles(): string { return this.settings.mapStyles; }
 }
