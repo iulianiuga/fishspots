@@ -24,6 +24,18 @@ import { ThemeSwitcherComponent } from './shared/theme-switcher.component';
   `
 })
 
+
+
+// @Component({
+//   selector: 'app-root',
+//   standalone: true,
+//   imports: [RouterOutlet, ToolbarModule, ButtonModule, ThemeSwitcherComponent],
+//   template: `
+
+//     <router-outlet />
+//   `
+// })
+
 export class AppComponent {
   title(title: any) {
     throw new Error('Method not implemented.');
