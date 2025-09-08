@@ -1,16 +1,59 @@
 <div #mapEl id="map" style="width:100%; height:100vh; position:relative;"></div>
+
+
 <button
-  pButton
-  type="button"
-  icon="pi pi-cog"
+  pButton type="button" icon="pi pi-cog"
   class="p-button-rounded"
   (click)="overlayPanel.toggle($event)"
-  style="position:absolute; top:20px; left:20px; z-index:10000;"
-></button>
-<p-overlayPanel #overlayPanel>
-  <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+  style="position:absolute; top:20px; left:20px; z-index:10000;">
+</button>
+
+<!-- ADD -->
+<button
+  pButton type="button"
+  [icon]="mode==='addLocation' ? 'pi pi-plus-circle' : 'pi pi-plus'"
+  [ngClass]="['p-button-rounded','fab', mode==='addLocation' ? 'p-button-success' : 'p-button-secondary']"
+  (click)="setMapBehaviour('addLocation')"
+  style="position:absolute; top:60px; left:20px; z-index:9800;">
+</button>
+
+<!-- DELETE -->
+<button
+  pButton type="button"
+  [icon]="mode==='deleteLocation' ? 'pi pi-minus-circle' : 'pi pi-minus'"
+  [ngClass]="['p-button-rounded','fab', mode==='deleteLocation' ?'p-button-success' : 'p-button-secondary']"
+  (click)="setMapBehaviour('deleteLocation')"
+  style="position:absolute; top:100px; left:20px; z-index:9800;">
+</button>
+
+<!-- NONE -->
+<button
+  pButton type="button"
+  [icon]="mode==='none' ? 'pi pi-circle-fill' : 'pi pi-circle-off'"
+  [ngClass]="['p-button-rounded','fab', mode==='none' ? 'p-button-success' : 'p-button-secondary']"
+  (click)="setMapBehaviour('none')"
+  style="position:absolute; top:140px; left:20px; z-index:9800;">
+</button>
+
+<!-- INFO -->
+<button
+  pButton type="button"
+  [icon]="mode==='getInfo' ? 'pi pi-info-circle' : 'pi pi-info'"
+  [ngClass]="['p-button-rounded','fab', mode==='getInfo' ? 'p-button-success' : 'p-button-secondary']"
+  (click)="setMapBehaviour('getInfo')"
+  style="position:absolute; top:180px; left:20px; z-index:9800;">
+</button>
+
+
+<p-overlayPanel
+  #overlayPanel
+  appendTo="body"
+  [baseZIndex]="10000"
+>
+  <div style="display:flex; flex-direction:column; gap:0.2rem">
     <button pButton type="button" label="Romania" (click)="resetView()"></button>
     <theme-switcher></theme-switcher>
+
     <p-dropdown
       [options]="mapStyles"
       [(ngModel)]="selectedStyle"
@@ -18,12 +61,16 @@
       placeholder="Alege stil hartă"
       (onChange)="onStyleChange($event.value)"
       styleClass="w-full"
+      appendTo="body"              
+     
     ></p-dropdown>
-
-    
-
-
-    <!-- Poți adăuga și alte controale aici -->
   </div>
 </p-overlayPanel>
+
+
+
+
+
+
+
 
