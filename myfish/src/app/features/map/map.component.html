@@ -57,13 +57,23 @@
     <p-dropdown
       [options]="mapStyles"
       [(ngModel)]="selectedStyle"
-      optionLabel="name"
+      optionLabel="id" 
       placeholder="Alege stil hartă"
       (onChange)="onStyleChange($event.value)"
       styleClass="w-full"
-      appendTo="body"              
+      appendTo="body"              >
+
+
+ <ng-template pTemplate="item" let-opt>
+    {{ opt.id }} -- {{ opt.name }}
+  </ng-template>
+
+  <ng-template pTemplate="selectedItem" let-opt>
+    <span *ngIf="opt">{{ opt.name }} -- {{ opt.id }}</span>
+  </ng-template>
+
      
-    ></p-dropdown>
+    </p-dropdown>
   </div>
 </p-overlayPanel>
 

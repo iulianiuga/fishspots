@@ -58,12 +58,9 @@ type Mode = 'none' | 'addLocation' | 'deleteLocation' | 'getInfo';
 
 export class MapComponent implements AfterViewInit, OnDestroy {
 
-
-
-
-  // === UI state ===
+  
   badgeOpen = false;
-  mode: Mode = 'none';                             // <-- nou: modul curent
+  mode: Mode = 'none'; 
 
   mapStyles: any[] = [];
   selectedStyle: any;
@@ -79,7 +76,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private drawInteraction?: Draw;                  // <-- nou
   private selectInteraction?: Select;              // <-- nou
 
-  constructor(private settings: AppSettingsService, private http: HttpClient, private confirmation: ConfirmationService) { }
+  constructor(private settings: AppSettingsService, 
+              private http: HttpClient, 
+              private confirmation: ConfirmationService) { }
 
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
 
@@ -94,15 +93,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const initialCenter = fromLonLat([25.809, 44.973]);
     const centerRo = fromLonLat([26.1, 44.43]);
 
-    // citesc stilurile de hartă available
+    //citesc stilurile de hartă available
     this.http.get<any[]>(this.settings.mapStyles).subscribe(styles => {
-      this.mapStyles = styles;
-      if (styles.length) {
+      this.mapStyles = styles 
+         if (styles.length) {
         this.selectedStyle = styles[0];
       }
-      // styles.forEach(style => {
-      //   console.log(`${style.name} - ${style.id}`);
-      // });
     });
 
     // === Sursă POI din API (GeoJSON) cu BBOX (moved to member) ===
@@ -225,14 +221,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const f = e.selected[0];
       if (!f) return;
 
-
-
-
       const fid = (f.getId?.() as any) ?? f.get('id'); // suport și GeoJSON fără feature.id
       const id = Number(fid);
-
       const name = f.get('name') ?? 'Punct fără nume';
-      
       const props = { ...f.getProperties() };
 
       if (this.mode === 'deleteLocation') {
