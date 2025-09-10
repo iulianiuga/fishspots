@@ -1,9 +1,14 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
-import { FormsModule } from '@angular/forms';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { DialogModule } from 'primeng/dialog'
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -18,7 +23,6 @@ import Point from 'ol/geom/Point';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
 import { FeatureLike } from 'ol/Feature';
 
-
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { fromLonLat, transformExtent, toLonLat } from 'ol/proj'; // <-- toLonLat (nou)
 
@@ -31,12 +35,6 @@ import { click as clickCondition } from 'ol/events/condition'; // <-- nou
 
 import { AppSettingsService } from '../../app-settings.service';
 import { ThemeSwitcherComponent } from '../../shared/theme-switcher.component';
-
-import { HttpClient } from '@angular/common/http';
-
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
-import { AnyType } from 'ol/expr/expression';
 
 type Mode = 'none' | 'addLocation' | 'deleteLocation' | 'getInfo';
 
@@ -51,17 +49,18 @@ type Mode = 'none' | 'addLocation' | 'deleteLocation' | 'getInfo';
     DropdownModule,
     FormsModule,
     ThemeSwitcherComponent,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    DialogModule
   ],
   providers: [ConfirmationService]
 })
-
-
 export class MapComponent implements AfterViewInit, OnDestroy {
 
-  
+  displayPoiDialog = false;
+  selectedPoiName: string | null = null;
+
   badgeOpen = false;
-  mode: Mode = 'none'; 
+  mode: Mode = 'none';
 
   mapStyles: any[] = [];
   selectedStyle: any;
@@ -77,9 +76,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private drawInteraction?: Draw;                  // <-- nou
   private selectInteraction?: Select;              // <-- nou
 
-  constructor(private settings: AppSettingsService, 
-              private http: HttpClient, 
-              private confirmation: ConfirmationService) { }
+  constructor(private settings: AppSettingsService,
+    private http: HttpClient,
+    private confirmation: ConfirmationService) { }
 
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
 
@@ -87,56 +86,53 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.badgeOpen = !this.badgeOpen;
   }
 
+  private poiStyle = (feature: FeatureLike, resolution: number) => {
+    const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
+    // optional: afiseaza eticheta doar cand esti suficient de aproape
+    const showText = resolution < 1050 ? label : '';
 
+    return new Style({
+      image: new CircleStyle({
+        radius: 5,
+        fill: new Fill({ color: '#19b6d2ff' }),
+        stroke: new Stroke({ color: '#ff0000ff', width: 2 })
+      }),
+      text: new Text({
+        text: showText,
+        font: '12px "Inter", Arial, sans-serif',
+        offsetY: -14,                 // mută textul deasupra punctului
+        padding: [2, 4, 2, 4],
+        fill: new Fill({ color: '#1c1d01ff' }),
+        stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
+        overflow: true
+      })
+    });
+  };
 
- private poiStyle = (feature: FeatureLike, resolution: number) => {
-      const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
-      // optional: afiseaza eticheta doar cand esti suficient de aproape
-      const showText = resolution < 1050 ? label : '';
+  private selectedPoiStyle = (feature: FeatureLike, resolution: number) => {
+    const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
+    // optional: afiseaza eticheta doar cand esti suficient de aproape
+    const showText = label;// : '';
 
-      return new Style({
-        image: new CircleStyle({
-          radius: 5,
-          fill: new Fill({ color: '#19b6d2ff' }),
-          stroke: new Stroke({ color: '#ff0000ff', width: 2 })
-        }),
-        text: new Text({
-          text: showText,
-          font: '12px "Inter", Arial, sans-serif',
-          offsetY: -14,                 // mută textul deasupra punctului
-          padding: [2, 4, 2, 4],
-          fill: new Fill({ color: '#1c1d01ff' }),
-          stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
-          overflow: true
-        })
-      });
-    };
+    return new Style({
+      image: new CircleStyle({
+        radius: 10,
+        fill: new Fill({ color: '#ffee00ff' }),
+        stroke: new Stroke({ color: '#ff0000ff', width: 2 })
+      }),
+      text: new Text({
+        text: showText,
+        font: '12px "Inter", Arial, sans-serif',
+        offsetY: -14,                 // mută textul deasupra punctului
+        padding: [2, 4, 2, 4],
+        fill: new Fill({ color: '#1c1d01ff' }),
+        stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
+        overflow: true,
 
-
-    private selectedPoiStyle = (feature: FeatureLike, resolution: number) => {
-      const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
-      // optional: afiseaza eticheta doar cand esti suficient de aproape
-      const showText =  label;// : '';
-
-      return new Style({
-        image: new CircleStyle({
-          radius: 10,
-          fill: new Fill({ color: '#ffee00ff' }),
-          stroke: new Stroke({ color: '#ff0000ff', width: 2 })
-        }),
-        text: new Text({
-          text: showText,
-          font: '12px "Inter", Arial, sans-serif',
-          offsetY: -14,                 // mută textul deasupra punctului
-          padding: [2, 4, 2, 4],
-          fill: new Fill({ color: '#1c1d01ff' }),
-          stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
-          overflow: true,
-
-        }),
-        zIndex: 12000
-      });
-    }
+      }),
+      zIndex: 10500
+    });
+  }
 
   ngAfterViewInit(): void {
     // Config inițial
@@ -147,8 +143,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     //citesc stilurile de hartă available
     this.http.get<any[]>(this.settings.mapStyles).subscribe(styles => {
-      this.mapStyles = styles 
-         if (styles.length) {
+      this.mapStyles = styles
+      if (styles.length) {
         this.selectedStyle = styles[0];
       }
     });
@@ -173,18 +169,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     //   })
     // });
 
-
-   
-
-
     this.poiLayer = new VectorLayer({
       source: this.poiSource,
       style: this.poiStyle,
       declutter: false
     });
-
-
-   
 
     // Marker fix pentru centru
     // const marker = new Feature<Point>({ geometry: new Point(centerRo) });
@@ -242,7 +231,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       });
     });
 
-
     // Select (folosit pentru Delete și Info)
     this.selectInteraction = new Select({
       layers: [this.poiLayer],
@@ -285,14 +273,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         );
 
       } else if (this.mode === 'getInfo') {
-        console.log('INFO feature', { id: fid, props });
-        // aici poți deschide overlay/side-panel cu props
-        // de ex: this.showInfoPanel({ id: fid, ...props });
+        //console.log('INFO feature', { id: fid, props });
+        
+        if (f.get('name').length) {
+          const f = e.selected[0] as Feature;
+          this.selectedPoiName = f.get('name') ?? 'Punct fără nume';
+          this.displayPoiDialog = true;
+        } else {
+          // clic în gol sau deselect
+          this.displayPoiDialog = false;
+          this.selectedPoiName = null;
+        }
+
       }
     });
   }
 
-  onStyleChange(style: any) {
+  onMapStyleChange(style: any) {
     if (style && style.url) {
       apply(this.map, style.url).catch(err => console.error('Eroare la schimbarea stilului:', err));
     }
@@ -325,6 +322,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   //       this.mode === 'deleteLocation' ? 'not-allowed' :
   //         this.mode === 'getInfo' ? 'help' : '';
   // }
+
+  onDialogHide() {
+    this.selectInteraction?.getFeatures().clear();
+  }
 
   resetView() {
     const extent4326 = [20.2201924985, 43.6884447292, 29.62654341, 48.2208812526];

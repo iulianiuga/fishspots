@@ -59,7 +59,7 @@
       [(ngModel)]="selectedStyle"
       optionLabel="id" 
       placeholder="Alege stil hartă"
-      (onChange)="onStyleChange($event.value)"
+      (onChange)="onMapStyleChange($event.value)"
       styleClass="w-full"
       appendTo="body"              >
 
@@ -77,7 +77,33 @@
   </div>
 </p-overlayPanel>
 
+
+<p-dialog
+  [(visible)]="displayPoiDialog"
+
+  [modal]="true"
+  [dismissableMask]="true"
+  [closable]="true"
+  header="Punct selectat"
+  (onHide)="onDialogHide()"
+  [style]="{ width: '22rem' }"
+>
+  <div class="text-base">
+    <div class="font-medium mb-2">Nume</div>
+    <div>{{ selectedPoiName || 'fără nume' }}</div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="OK" (click)="displayPoiDialog=false"></button>
+  </ng-template>
+</p-dialog>
+
+
+
 <p-confirmDialog></p-confirmDialog>
+
+
+
 
 
 
