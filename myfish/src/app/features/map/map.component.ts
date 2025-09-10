@@ -36,6 +36,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { AnyType } from 'ol/expr/expression';
 
 type Mode = 'none' | 'addLocation' | 'deleteLocation' | 'getInfo';
 
@@ -86,6 +87,57 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.badgeOpen = !this.badgeOpen;
   }
 
+
+
+ private poiStyle = (feature: FeatureLike, resolution: number) => {
+      const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
+      // optional: afiseaza eticheta doar cand esti suficient de aproape
+      const showText = resolution < 1050 ? label : '';
+
+      return new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({ color: '#19b6d2ff' }),
+          stroke: new Stroke({ color: '#ff0000ff', width: 2 })
+        }),
+        text: new Text({
+          text: showText,
+          font: '12px "Inter", Arial, sans-serif',
+          offsetY: -14,                 // mută textul deasupra punctului
+          padding: [2, 4, 2, 4],
+          fill: new Fill({ color: '#1c1d01ff' }),
+          stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
+          overflow: true
+        })
+      });
+    };
+
+
+    private selectedPoiStyle = (feature: FeatureLike, resolution: number) => {
+      const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
+      // optional: afiseaza eticheta doar cand esti suficient de aproape
+      const showText =  label;// : '';
+
+      return new Style({
+        image: new CircleStyle({
+          radius: 10,
+          fill: new Fill({ color: '#ffee00ff' }),
+          stroke: new Stroke({ color: '#ff0000ff', width: 2 })
+        }),
+        text: new Text({
+          text: showText,
+          font: '12px "Inter", Arial, sans-serif',
+          offsetY: -14,                 // mută textul deasupra punctului
+          padding: [2, 4, 2, 4],
+          fill: new Fill({ color: '#1c1d01ff' }),
+          stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
+          overflow: true,
+
+        }),
+        zIndex: 12000
+      });
+    }
+
   ngAfterViewInit(): void {
     // Config inițial
     const styleUrl = this.settings.mapStyleUrl;
@@ -122,35 +174,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // });
 
 
-    const poiStyle = (feature: FeatureLike, resolution: number) => {
-      const label = feature.get('name') ?? ''; // sau 'label', dupa cum ai in date
-      // optional: afiseaza eticheta doar cand esti suficient de aproape
-      const showText = resolution < 1050 ? label : '';
-
-      return new Style({
-        image: new CircleStyle({
-          radius: 5,
-          fill: new Fill({ color: '#19b6d2ff' }),
-          stroke: new Stroke({ color: '#ff0000ff', width: 2 })
-        }),
-        text: new Text({
-          text: showText,
-          font: '12px "Inter", Arial, sans-serif',
-          offsetY: -14,                 // mută textul deasupra punctului
-          padding: [2, 4, 2, 4],
-          fill: new Fill({ color: '#1c1d01ff' }),
-          stroke: new Stroke({ color: '#ddcdcdff', width: 3 }), // contur pentru lizibilitate
-          overflow: true
-        })
-      });
-    };
+   
 
 
     this.poiLayer = new VectorLayer({
       source: this.poiSource,
-      style: poiStyle,
-      declutter: true
+      style: this.poiStyle,
+      declutter: false
     });
+
+
+   
 
     // Marker fix pentru centru
     // const marker = new Feature<Point>({ geometry: new Point(centerRo) });
@@ -220,6 +254,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.selectInteraction.on('select', (e) => {
       const f = e.selected[0];
       if (!f) return;
+
+      f.setStyle(this.selectedPoiStyle); // stil diferit pentru selectat
 
       const fid = (f.getId?.() as any) ?? f.get('id'); // suport și GeoJSON fără feature.id
       const id = Number(fid);

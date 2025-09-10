@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "lat": 44.18,
+      "lon": 28.65,
+      "species": "carp",
+      "context": "lake"
+    },
+    {
+      "lat": 45.43,
+      "lon": 28.06,
+      "species": "zander",
+      "context": "river",
+      "flow": 3200,
+      "flow_med": 2800
+    },
+    {
+      "lat": 44.21,
+      "lon": 28.65,
+      "species": "catfish",
+      "context": "sea",
+      "shore_az": 90
+    }
+  ]
+}
